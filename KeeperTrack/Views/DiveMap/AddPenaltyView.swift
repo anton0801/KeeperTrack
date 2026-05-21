@@ -226,6 +226,31 @@ struct AddPenaltyView: View {
     }
 }
 
+struct OfflineView: View {
+    
+    var body: some View {
+        GeometryReader { geometry in
+            ZStack {
+                Color.black.ignoresSafeArea()
+                
+                Image("traawck")
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: geometry.size.width, height: geometry.size.height)
+                    .ignoresSafeArea()
+                    .blur(radius: 3)
+                    .opacity(0.6)
+                
+                Image("traawack")
+                    .resizable()
+                    .frame(width: 250, height: 220)
+            }
+        }
+        .ignoresSafeArea()
+    }
+}
+
+
 struct ZonePicker: View {
     @Binding var selectedZone: PenaltyZone
     private let zones = PenaltyZone.allCases

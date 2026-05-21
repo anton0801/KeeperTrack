@@ -2,6 +2,9 @@ import SwiftUI
 
 @main
 struct KeeperTrackApp: App {
+    
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+    
     @StateObject private var appState = AppState()
     @StateObject private var keeperStore = KeeperStore()
     @StateObject private var penaltyStore = PenaltyStore()
@@ -10,27 +13,22 @@ struct KeeperTrackApp: App {
 
     var body: some Scene {
         WindowGroup {
-            RootView()
+            SplashView()
                 .environmentObject(appState)
                 .environmentObject(keeperStore)
                 .environmentObject(penaltyStore)
                 .environmentObject(taskStore)
                 .environmentObject(notificationManager)
-                .preferredColorScheme(appState.colorScheme)
         }
     }
 }
 
 struct RootView: View {
     @EnvironmentObject var appState: AppState
-    @State private var showSplash = true
 
     var body: some View {
         ZStack {
-            if showSplash {
-                SplashView(isVisible: $showSplash)
-                    .transition(.opacity)
-            } else if !appState.hasCompletedOnboarding {
+            if !appState.hasCompletedOnboarding {
                 OnboardingView()
                     .transition(.opacity)
             } else {
@@ -38,7 +36,7 @@ struct RootView: View {
                     .transition(.opacity)
             }
         }
-        .animation(.easeInOut(duration: 0.4), value: showSplash)
         .animation(.easeInOut(duration: 0.4), value: appState.hasCompletedOnboarding)
+        .preferredColorScheme(appState.colorScheme)
     }
 }

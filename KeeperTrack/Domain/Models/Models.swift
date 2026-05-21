@@ -16,41 +16,21 @@ struct Keeper: Identifiable, Codable {
     }
 }
 
-// MARK: - Penalty Record
-struct PenaltyRecord: Identifiable, Codable {
-    var id: UUID = UUID()
-    var keeperID: UUID
-    var date: Date = Date()
-    var shotZone: PenaltyZone
-    var diveDirection: DiveDirection
-    var outcome: PenaltyOutcome
-    var notes: String = ""
-    var sessionTag: String = ""
-}
 
-// MARK: - Training Task
-struct TrainingTask: Identifiable, Codable {
-    var id: UUID = UUID()
-    var keeperID: UUID?
-    var title: String
-    var notes: String = ""
-    var dueDate: Date?
-    var isCompleted: Bool = false
-    var createdAt: Date = Date()
-    var priority: TaskPriority = .medium
-
-    enum TaskPriority: String, CaseIterable, Codable {
-        case low = "Low"
-        case medium = "Medium"
-        case high = "High"
-
-        var color: Color {
-            switch self {
-            case .low: return .chartNeutral
-            case .medium: return .accentOrange
-            case .high: return .chartMiss
-            }
+class KeeperFault: Error, CustomStringConvertible {
+    let code: String
+    let context: String?
+    
+    init(code: String, context: String? = nil) {
+        self.code = code
+        self.context = context
+    }
+    
+    var description: String {
+        if let ctx = context {
+            return "\(String(describing: type(of: self)))[\(code): \(ctx)]"
         }
+        return "\(String(describing: type(of: self)))[\(code)]"
     }
 }
 
@@ -65,6 +45,18 @@ struct NotificationSetting: Codable {
         case daily = "Daily"
         case weekdays = "Weekdays"
         case weekly = "Weekly"
+    }
+}
+
+final class AttributionFault: KeeperFault {
+    init(reason: String) {
+        super.init(code: "ATTRIBUTION", context: reason)
+    }
+}
+
+final class ValidationFault: KeeperFault {
+    init(reason: String) {
+        super.init(code: "VALIDATION", context: reason)
     }
 }
 

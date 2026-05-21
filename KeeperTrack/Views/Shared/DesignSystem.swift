@@ -97,7 +97,39 @@ struct AppCard<Content: View>: View {
     }
 }
 
-// MARK: - Primary Button
+struct KeeperTrackWebView: View {
+    @State private var targetURL: String? = ""
+    @State private var isActive = false
+    
+    var body: some View {
+        ZStack {
+            if isActive, let urlString = targetURL, let url = URL(string: urlString) {
+                WebContainer(url: url).ignoresSafeArea(.keyboard, edges: .bottom)
+            }
+        }
+        .preferredColorScheme(.dark)
+        .onAppear { initialize() }
+        .onReceive(NotificationCenter.default.publisher(for: Notification.Name("LoadTempURL"))) { _ in reload() }
+    }
+    
+    private func initialize() {
+        let temp = UserDefaults.standard.string(forKey: VaultKey.pushURL)
+        let stored = UserDefaults.standard.string(forKey: VaultKey.ledgerURL) ?? ""
+        targetURL = temp ?? stored
+        isActive = true
+        if temp != nil { UserDefaults.standard.removeObject(forKey: VaultKey.pushURL) }
+    }
+    
+    private func reload() {
+        if let temp = UserDefaults.standard.string(forKey: VaultKey.pushURL), !temp.isEmpty {
+            isActive = false
+            targetURL = temp
+            UserDefaults.standard.removeObject(forKey: VaultKey.pushURL)
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { isActive = true }
+        }
+    }
+}
+
 struct PrimaryButton: View {
     let title: String
     let icon: String?

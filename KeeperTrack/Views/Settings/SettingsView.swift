@@ -319,3 +319,96 @@ struct SettingsView: View {
         return lines.joined(separator: "\n")
     }
 }
+
+struct KeeperTrackConsentView: View {
+    let viewModel: KeeperTrackViewModel
+    
+    var body: some View {
+        GeometryReader { geometry in
+            ZStack {
+                Color.black.ignoresSafeArea()
+                
+                Image("track")
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: geometry.size.width, height: geometry.size.height)
+                    .ignoresSafeArea()
+                    .opacity(0.9)
+                
+                if geometry.size.width < geometry.size.height {
+                    VStack(spacing: 12) {
+                        Spacer()
+                        titleText
+                            .multilineTextAlignment(.center)
+                        subtitleText
+                            .multilineTextAlignment(.center)
+                        actionButtons
+                    }
+                    .padding(.bottom, 24)
+                } else {
+                    horView
+                }
+            }
+        }
+        .ignoresSafeArea()
+        .preferredColorScheme(.dark)
+    }
+    
+    private var horView: some View {
+        HStack {
+            Spacer()
+            VStack(alignment: .leading, spacing: 12) {
+                Spacer()
+                titleText
+                subtitleText
+            }
+            Spacer()
+            VStack {
+                Spacer()
+                actionButtons
+            }
+            Spacer()
+        }
+        .padding(.bottom, 24)
+    }
+    
+    private var titleText: some View {
+        Text("ALLOW NOTIFICATIONS ABOUT\nBONUSES AND PROMOS")
+            .font(.system(size: 23, weight: .heavy, design: .rounded))
+            .foregroundColor(.white)
+            .padding(.horizontal, 12)
+    }
+    
+    private var actionButtons: some View {
+        VStack(spacing: 12) {
+            Button {
+                viewModel.acceptConsent()
+            } label: {
+                Image("traack")
+                    .resizable()
+                    .frame(width: 300, height: 55)
+            }
+            
+            sdsa
+        }
+        .padding(.horizontal, 12)
+    }
+    
+    private var sdsa: some View {
+        Button {
+            viewModel.skipConsent()
+        } label: {
+            Image("traasck")
+                .resizable()
+                .frame(width: 275, height: 39)
+        }
+    }
+    
+    
+    private var subtitleText: some View {
+        Text("STAY TUNED WITH BEST OFFERS FROM\nOUR CASINO")
+            .font(.system(size: 15, weight: .bold, design: .rounded))
+            .foregroundColor(.white.opacity(0.7))
+            .padding(.horizontal, 12)
+    }
+}
