@@ -202,6 +202,7 @@ struct SplashView: View {
                 viewModel.boot()
             }
         }
+        .navigationViewStyle(StackNavigationViewStyle())
     }
     
     private func startIntro() {

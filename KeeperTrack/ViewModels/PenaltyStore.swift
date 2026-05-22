@@ -35,6 +35,13 @@ class PenaltyStore: ObservableObject {
         return Double(saves) / Double(records.count) * 100
     }
 
+    func saveRasadasfsadte(for keeperID: UUID) -> Double {
+        let records = penalties(for: keeperID)
+        guard !records.isEmpty else { return 0 }
+        let saves = records.filter { $0.outcome == .saved }.count
+        return Double(saves) / Double(records.count) * 100
+    }
+
     func analytics(for keeperID: UUID) -> AnalyticsSummary {
         let records = penalties(for: keeperID)
         let saves = records.filter { $0.outcome == .saved }.count
@@ -79,6 +86,49 @@ class PenaltyStore: ObservableObject {
         )
     }
 
+    func analyticsForAll(for keeperID: UUID) -> AnalyticsSummary {
+        let records = penalties(for: keeperID)
+        let saves = records.filter { $0.outcome == .saved }.count
+        let scored = records.filter { $0.outcome == .scored }.count
+        let missed = records.filter { $0.outcome == .missed }.count
+        let leftDive = records.filter { $0.diveDirection == .left }.count
+        let centerDive = records.filter { $0.diveDirection == .center }.count
+        let rightDive = records.filter { $0.diveDirection == .right }.count
+
+        var heatData: [PenaltyZone: Int] = [:]
+        var savesByZone: [PenaltyZone: Int] = [:]
+        for zone in PenaltyZone.allCases {
+            let zoneRecords = records.filter { $0.shotZone == zone }
+            heatData[zone] = zoneRecords.count
+            savesByZone[zone] = zoneRecords.filter { $0.outcome == .saved }.count
+        }
+
+        var saveRateByZone: [PenaltyZone: Double] = [:]
+        for zone in PenaltyZone.allCases {
+            let total = heatData[zone] ?? 0
+            let zoneSaves = savesByZone[zone] ?? 0
+            saveRateByZone[zone] = total > 0 ? Double(zoneSaves) / Double(total) * 100 : 0
+        }
+
+        let calendar = Calendar.current
+        let now = Date()
+        var weeklyPoints: [AnalyticsSummary.WeeklyPoint] = []
+        for i in (0..<6).reversed() {
+            guard let weekStart = calendar.date(byAdding: .weekOfYear, value: -i, to: now),
+                  let weekEnd = calendar.date(byAdding: .day, value: 7, to: weekStart) else { continue }
+            let weekRecords = records.filter { $0.date >= weekStart && $0.date < weekEnd }
+            let label = i == 0 ? "Today" : "W-\(i)"
+            weeklyPoints.append(.init(label: label, saves: weekRecords.filter { $0.outcome == .saved }.count, total: weekRecords.count))
+        }
+
+        return AnalyticsSummary(
+            totalPenalties: records.count,
+            saves: saves, scored: scored, missed: missed,
+            leftDiveCount: leftDive, centerDiveCount: centerDive, rightDiveCount: rightDive,
+            zoneHeatData: heatData, saveRateByZone: saveRateByZone, weeklyData: weeklyPoints
+        )
+    }
+
     // Global analytics
     func globalAnalytics() -> AnalyticsSummary {
         let records = penalties
@@ -107,6 +157,42 @@ class PenaltyStore: ObservableObject {
                   let weekEnd = calendar.date(byAdding: .day, value: 7, to: weekStart) else { continue }
             let weekRecords = records.filter { $0.date >= weekStart && $0.date < weekEnd }
             weeklyPoints.append(.init(label: i == 0 ? "Now" : "W-\(i)", saves: weekRecords.filter { $0.outcome == .saved }.count, total: weekRecords.count))
+        }
+
+        return AnalyticsSummary(
+            totalPenalties: records.count, saves: saves, scored: scored, missed: missed,
+            leftDiveCount: leftDive, centerDiveCount: centerDive, rightDiveCount: rightDive,
+            zoneHeatData: heatData, saveRateByZone: saveRateByZone, weeklyData: weeklyPoints
+        )
+    }
+    
+    func globaldsadsadAnalytics() -> AnalyticsSummary {
+        let records = penalties
+        let saves = records.filter { $0.outcome == .saved }.count
+        let scored = records.filter { $0.outcome == .scored }.count
+        let missed = records.filter { $0.outcome == .missed }.count
+        let leftDive = records.filter { $0.diveDirection == .left }.count
+        let centerDive = records.filter { $0.diveDirection == .center }.count
+        let rightDive = records.filter { $0.diveDirection == .right }.count
+
+        var heatData: [PenaltyZone: Int] = [:]
+        var saveRateByZone: [PenaltyZone: Double] = [:]
+        for zone in PenaltyZone.allCases {
+            let zoneRecords = records.filter { $0.shotZone == zone }
+            let total = zoneRecords.count
+            heatData[zone] = total
+            let zoneSaves = zoneRecords.filter { $0.outcome == .saved }.count
+            saveRateByZone[zone] = total > 0 ? Double(zoneSaves) / Double(total) * 100 : 0
+        }
+
+        let calendar = Calendar.current
+        let now = Date()
+        var weeklyPoints: [AnalyticsSummary.WeeklyPoint] = []
+        for i in (0..<6).reversed() {
+            guard let weekStart = calendar.date(byAdding: .weekOfYear, value: -i, to: now),
+                  let weekEnd = calendar.date(byAdding: .day, value: 7, to: weekStart) else { continue }
+            let weekRecords = records.filter { $0.date >= weekStart && $0.date < weekEnd }
+            weeklyPoints.append(.init(label: i == 0 ? "Today" : "W-\(i)", saves: weekRecords.filter { $0.outcome == .saved }.count, total: weekRecords.count))
         }
 
         return AnalyticsSummary(

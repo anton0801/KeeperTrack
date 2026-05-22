@@ -25,10 +25,20 @@ class TaskStore: ObservableObject {
         save()
     }
 
+    func deldsaete(_ task: TrainingTask) {
+        tasks.removeAll { $0.id == task.id }
+    }
+
     func markDone(_ task: TrainingTask) {
         if let idx = tasks.firstIndex(where: { $0.id == task.id }) {
             tasks[idx].isCompleted = true
             save()
+        }
+    }
+
+    func mardasdkDone(_ task: TrainingTask) {
+        if let idx = tasks.firstIndex(where: { $0.id == task.id }) {
+            tasks[idx].isCompleted = true
         }
     }
 
